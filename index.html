@@ -155,7 +155,7 @@ const DIMS = [
 ];
 const UNFAMILIAR = "na";
 
-const FORM_ENDPOINT = "https://formsubmit.co/ajax/kate@violetstudios.org";
+const SHEET_ENDPOINT = "https://script.google.com/macros/s/AKfycbwsrYwhDsGUdL2MWlfjqpcKAfV4D_yp8wuNgXvKiSczxl7BWK0wPaPN0jizqaXrEn4/exec"; // Google Apps Script web app (see google-sheet/Code.gs)
 const STORE_KEY = "love-it-or-hate-it-v1";
 
 const state = {
@@ -179,7 +179,7 @@ function save() {
   try {
     localStorage.setItem(STORE_KEY, JSON.stringify({
       order: state.order, idx: state.idx, ratings: state.ratings,
-      startedAt: state.startedAt, completedAt: state.completedAt, send: state.send === "sent" ? "sent" : null,
+      startedAt: state.startedAt, completedAt: state.completedAt, send: state.send === "sent" ? "sent" : null, responseId: state.responseId || null,
     }));
   } catch (e) {}
 }
@@ -194,6 +194,7 @@ function restore() {
     state.startedAt = d.startedAt || null;
     state.completedAt = missing.length ? null : d.completedAt || null;
     state.send = state.completedAt ? d.send || null : null;
+    state.responseId = state.completedAt ? d.responseId || null : null;
   } catch (e) {}
 }
 
@@ -201,23 +202,19 @@ function restore() {
 function scoreText(v) { return v === UNFAMILIAR ? "Not familiar" : String(v); }
 function submitAnswers() {
   state.send = "sending"; render();
+  if (!state.responseId) state.responseId = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2));
   const payload = {
-    _subject: "Love It or Hate It: new response",
-    _template: "table",
-    _captcha: "false",
-    "Finished at": new Date(state.completedAt).toUTCString(),
-    "Not familiar with (count)": String(ORGS.filter(o => state.ratings[o.slug]?.work === UNFAMILIAR).length),
+    responseId: state.responseId,
+    finishedAt: state.completedAt,
+    ratings: ORGS.map(o => {
+      const r = state.ratings[o.slug] || {};
+      return { org: o.name, name: r.name, logo: r.logo, work: r.work === UNFAMILIAR ? "na" : r.work };
+    }),
   };
-  ORGS.slice().sort((a, b) => a.name.localeCompare(b.name)).forEach(o => {
-    const r = state.ratings[o.slug] || {};
-    payload[o.name] = `Name ${scoreText(r.name)} / Logo ${scoreText(r.logo)} / Work ${scoreText(r.work)}`;
-  });
-  fetch(FORM_ENDPOINT, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "Accept": "application/json" },
-    body: JSON.stringify(payload),
-  }).then(res => res.ok ? res.json() : Promise.reject(res.status))
-    .then(j => { if (j && (j.success === false || j.success === "false")) throw new Error(j.message || "not sent"); state.send = "sent"; })
+  // text/plain keeps this a "simple" request, which Google Apps Script accepts from other sites.
+  fetch(SHEET_ENDPOINT, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) })
+    .then(res => res.ok ? res.json() : Promise.reject(res.status))
+    .then(j => { if (!j || j.ok !== true) throw new Error((j && j.error) || "not saved"); state.send = "sent"; })
     .catch(() => { state.send = "error"; })
     .finally(() => { save(); if (state.screen === "done") render(); });
 }
@@ -263,7 +260,7 @@ function renderIntro() {
 function firstIncomplete() { const i = state.order.findIndex(s => !complete(s)); return i < 0 ? state.order.length - 1 : i; }
 function startNew() {
   state.order = shuffle(ORGS.map(o => o.slug));
-  state.ratings = {}; state.idx = 0; state.completedAt = null; state.startedAt = new Date().toISOString();
+  state.ratings = {}; state.idx = 0; state.completedAt = null; state.responseId = null; state.send = null; state.startedAt = new Date().toISOString();
   save(); go("play");
 }
 
