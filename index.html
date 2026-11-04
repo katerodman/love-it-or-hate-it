@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Love It or Hate It</title>
+<meta name="description" content="Rate 30 animal-advocacy organizations on their name, logo and work.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Catamaran:wght@400;500;600;700&family=Fira+Sans+Condensed:wght@500;600;700;800&display=swap">
+<style>
+/* Layout: one centered phone-width column; each org is a single card screen with three rating rows. */
+:root {
+  --bg: #fafaff;
+  --surface: #ffffff;
+  --ink: #161919;
+  --muted: #625d7a;
+  --line: #dcd8ec;
+  --accent: #8a4aff;
+  --accent-ink: #ffffff;
+  --accent-soft: #e7e1ff;
+  --hate: #d9485f;
+  --love: #2f9e6b;
+  --warn-bg: #fff4d6;
+  --warn-ink: #6b4c00;
+  --font-display: "Fira Sans Condensed", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "Catamaran", system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* Buttons follow violetstudios.org: 2px violet-to-blue gradient outline, 5px corners, Catamaran bold. */
+  --grad-a: #c022ff; --grad-b: #5370ff;
+  --radius: 18px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141221; --surface: #1f1c31; --ink: #f1eff9; --muted: #a7a2c2; --line: #353050;
+    --accent: #9d88ff; --accent-ink: #141221; --accent-soft: #2e2850;
+    --hate: #ff7d90; --love: #5fd39d; --warn-bg: #3a3014; --warn-ink: #f5d98a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141221; --surface: #1f1c31; --ink: #f1eff9; --muted: #a7a2c2; --line: #353050;
+  --accent: #9d88ff; --accent-ink: #141221; --accent-soft: #2e2850;
+  --hate: #ff7d90; --love: #5fd39d; --warn-bg: #3a3014; --warn-ink: #f5d98a;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.45;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 12px 24px;
+}
+.app { max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+h1, h2 { font-family: var(--font-display); margin: 0; text-wrap: balance; line-height: 1.05; }
+h1 { font-size: 2.9rem; font-weight: 600; letter-spacing: 0; }
+h2 { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.01em; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.btn {
+  border: 2px solid transparent; border-radius: 5px; padding: 10px 32px; font-weight: 700; font-size: 1.05rem; letter-spacing: .02em;
+  background: linear-gradient(var(--bg), var(--bg)) padding-box, linear-gradient(to right, var(--grad-a), var(--grad-b)) border-box;
+  color: var(--ink); min-height: 52px; transition: background .15s ease, color .15s ease;
+}
+.btn:not(:disabled):hover { background: linear-gradient(to right, var(--grad-a), var(--grad-b)) padding-box, linear-gradient(to right, var(--grad-a), var(--grad-b)) border-box; color: #ffffff; }
+.btn:disabled { opacity: .35; cursor: not-allowed; }
+.btn.ghost { background: transparent; color: var(--ink); border: 2px solid var(--line); }
+.btn.ghost:not(:disabled):hover { background: transparent; color: var(--ink); border-color: var(--muted); }
+.btn.link { background: none; color: var(--accent); padding: 8px 0; min-height: 0; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.notice { background: var(--warn-bg); color: var(--warn-ink); padding: 12px 14px; border-radius: 12px; font-size: .92rem; }
+
+/* Intro */
+.intro { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 20px; padding-top: 12px; }
+.intro > * { width: 100%; max-width: 400px; }
+.eyebrow { font-size: .78rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+.three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.three div { background: var(--surface); border: 1px solid var(--line); border-radius: 5px; padding: 12px 10px; text-align: center; }
+.three b { display: block; font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; letter-spacing: .06em; }
+.three span { font-size: .85rem; color: var(--muted); }
+.scale-demo { display: flex; justify-content: space-between; font-size: .85rem; color: var(--muted); }
+.intro .actions { display: flex; flex-direction: column; gap: 10px; }
+
+
+/* Card */
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: .9rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.progress { height: 6px; background: var(--line); border-radius: 99px; overflow: hidden; }
+.progress i { display: block; height: 100%; background: var(--accent); border-radius: 99px; transition: width .3s ease; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+.logo-tile {
+  /* Always white so logos made for light backgrounds stay visible in dark mode. */
+  background: #ffffff; border-radius: 14px; height: 128px; display: grid; place-items: center; padding: 14px;
+  border: 1px solid var(--line);
+}
+.logo-tile img { max-height: 100px; max-width: 100%; object-fit: contain; }
+.logo-tile .nologo { color: #8a85a3; font-size: .9rem; }
+.org-name { font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; text-align: center; text-wrap: balance; line-height: 1.1; }
+.rate { display: flex; flex-direction: column; gap: 8px; }
+.rate-head { display: flex; justify-content: space-between; align-items: baseline; }
+.rate-head b { font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; }
+.rate-head small { color: var(--muted); font-size: .8rem; }
+.dots { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.dot {
+  min-height: 44px; border-radius: 12px; border: 2px solid var(--line); background: transparent;
+  font-weight: 700; font-size: 1.15rem; font-variant-numeric: tabular-nums; transition: transform .1s ease, background .15s ease;
+}
+.dot:active { transform: scale(.94); }
+.dot[aria-pressed="true"] { color: #fff; border-color: transparent; }
+.dot[data-v="1"][aria-pressed="true"] { background: var(--hate); }
+.dot[data-v="2"][aria-pressed="true"] { background: color-mix(in oklab, var(--hate) 65%, var(--muted)); }
+.dot[data-v="3"][aria-pressed="true"] { background: var(--muted); }
+.dot[data-v="4"][aria-pressed="true"] { background: color-mix(in oklab, var(--love) 65%, var(--muted)); }
+.dot[data-v="5"][aria-pressed="true"] { background: var(--love); }
+.ends { display: flex; justify-content: space-between; font-size: .75rem; color: var(--muted); }
+.unfamiliar {
+  border: 2px dashed var(--line); background: transparent; border-radius: 12px; padding: 10px 12px; font-size: .9rem; font-weight: 600; color: var(--muted);
+}
+.unfamiliar[aria-pressed="true"] { border-style: solid; border-color: var(--accent); background: var(--accent-soft); color: var(--ink); }
+.nav { display: grid; grid-template-columns: auto 1fr; gap: 10px; }
+
+/* Summary & results */
+.list { display: flex; flex-direction: column; gap: 8px; }
+.row { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px; display: grid; grid-template-columns: 44px 1fr; gap: 12px; align-items: center; }
+.row .mini { width: 44px; height: 44px; background: #fff; border-radius: 10px; display: grid; place-items: center; padding: 4px; border: 1px solid var(--line); }
+.row .mini img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.row .nm { font-weight: 700; min-width: 0; }
+.scores { display: flex; gap: 12px; font-size: .85rem; color: var(--muted); font-variant-numeric: tabular-nums; flex-wrap: wrap; }
+.scores b { color: var(--ink); }
+.table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+table { border-collapse: collapse; width: 100%; font-size: .88rem; font-variant-numeric: tabular-nums; }
+th, td { padding: 9px 10px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th button { background: none; border: 0; padding: 0; font-weight: 700; color: var(--muted); font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; }
+th button[aria-sort] { color: var(--accent); }
+td.num { text-align: right; }
+th.num { text-align: right; }
+tr:last-child td { border-bottom: 0; }
+.n { color: var(--muted); font-size: .75rem; }
+.stat-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 10px 14px; }
+.stat b { font-family: var(--font-display); font-size: 1.5rem; display: block; }
+.stat span { font-size: .8rem; color: var(--muted); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+
+<script>
+const ORGS = /*ORGS*/[{"name": "Ambitious Impact", "slug": "ambitious-impact", "logo": "logos/ambitious-impact.png"}, {"name": "Animal Advocacy Careers", "slug": "animal-advocacy-careers", "logo": "logos/animal-advocacy-careers.svg"}, {"name": "Animal Alliance Asia", "slug": "animal-alliance-asia", "logo": "logos/animal-alliance-asia.png"}, {"name": "Animal Charity Evaluators", "slug": "animal-charity-evaluators", "logo": "logos/animal-charity-evaluators.png"}, {"name": "Animal Defense Partnership", "slug": "animal-defense-partnership", "logo": "logos/animal-defense-partnership.png"}, {"name": "Animal Equality", "slug": "animal-equality", "logo": "logos/animal-equality.svg"}, {"name": "Animal Law Focus", "slug": "animal-law-focus", "logo": "logos/animal-law-focus.png"}, {"name": "Animetrics", "slug": "animetrics", "logo": "logos/animetrics.png"}, {"name": "Brighter Table", "slug": "brighter-table", "logo": "logos/brighter-table.png"}, {"name": "Electric Sheep", "slug": "electric-sheep", "logo": "logos/electric-sheep.png"}, {"name": "Farmed Animal Strategic Team (FAST)", "slug": "fast", "logo": "logos/fast.png"}, {"name": "Food Solutions Action", "slug": "food-solutions-action", "logo": "logos/food-solutions-action.png"}, {"name": "Hive", "slug": "hive", "logo": "logos/hive.png"}, {"name": "Liberate In Mind", "slug": "liberate-in-mind", "logo": "logos/liberate-in-mind.png"}, {"name": "Nourish", "slug": "nourish", "logo": "logos/nourish.png"}, {"name": "People for Better Food", "slug": "people-for-better-food", "logo": "logos/people-for-better-food.png"}, {"name": "Reporters for Animals International", "slug": "reporters-for-animals-international", "logo": "logos/reporters-for-animals-international.png"}, {"name": "Senterra Funders", "slug": "senterra-funders", "logo": "logos/senterra-funders.jpg"}, {"name": "Scarlet Spark", "slug": "scarlet-spark", "logo": "logos/scarlet-spark.png"}, {"name": "Sea Shepherd", "slug": "sea-shepherd", "logo": "logos/sea-shepherd.png"}, {"name": "Sentient", "slug": "sentient", "logo": "logos/sentient.svg"}, {"name": "Sharpen Strategy", "slug": "sharpen-strategy", "logo": "logos/sharpen-strategy.png"}, {"name": "Sinergia Animal", "slug": "sinergia-animal", "logo": "logos/sinergia-animal.png"}, {"name": "Species Unite", "slug": "species-unite", "logo": "logos/species-unite.png"}, {"name": "Stray Dog Institute", "slug": "stray-dog-institute", "logo": "logos/stray-dog-institute.png"}, {"name": "Thrive Philanthropy", "slug": "thrive-philanthropy", "logo": "logos/thrive-philanthropy.png"}, {"name": "Vegan Hospitality", "slug": "vegan-hospitality", "logo": "logos/vegan-hospitality.png"}, {"name": "Veganuary", "slug": "veganuary", "logo": "logos/veganuary.svg"}, {"name": "Who Let the Docs Out", "slug": "who-let-the-docs-out", "logo": "logos/who-let-the-docs-out.png"}, {"name": "The Humane League", "slug": "the-humane-league", "logo": "logos/the-humane-league.png"}]/*END*/;
+const BY_SLUG = Object.fromEntries(ORGS.map(o => [o.slug, o]));
+const DIMS = [
+  { key: "name", label: "Name", hint: "How do you feel about the name?" },
+  { key: "logo", label: "Logo", hint: "How do you feel about the logo?" },
+  { key: "work", label: "Their work", hint: "How do you feel about what they do?" },
+];
+const UNFAMILIAR = "na";
+
+const FORM_ENDPOINT = "https://formsubmit.co/ajax/kate@violetstudios.org";
+const STORE_KEY = "love-it-or-hate-it-v1";
+
+const state = {
+  screen: "intro",       // intro | play | done | summary
+  order: [],
+  idx: 0,
+  ratings: {},
+  startedAt: null,
+  completedAt: null,
+  send: null,            // null | "sending" | "sent" | "error"
+};
+
+const app = document.getElementById("app");
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function logoImg(o) { return o.logo ? `<img src="${esc(o.logo)}" alt="${esc(o.name)} logo">` : `<span class="nologo">No logo</span>`; }
+function complete(slug) { const r = state.ratings[slug]; return r && r.name && r.logo && r.work; }
+
+/* ---------- progress is kept in this browser so players can leave and come back ---------- */
+function save() {
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify({
+      order: state.order, idx: state.idx, ratings: state.ratings,
+      startedAt: state.startedAt, completedAt: state.completedAt, send: state.send === "sent" ? "sent" : null,
+    }));
+  } catch (e) {}
+}
+function restore() {
+  try {
+    const d = JSON.parse(localStorage.getItem(STORE_KEY) || "null");
+    if (!d || !Array.isArray(d.order)) return;
+    const known = d.order.filter(s => BY_SLUG[s]);
+    const missing = ORGS.map(o => o.slug).filter(s => !known.includes(s));
+    state.order = known.concat(shuffle(missing));
+    state.ratings = d.ratings || {}; state.idx = Math.min(d.idx || 0, state.order.length - 1);
+    state.startedAt = d.startedAt || null;
+    state.completedAt = missing.length ? null : d.completedAt || null;
+    state.send = state.completedAt ? d.send || null : null;
+  } catch (e) {}
+}
+
+/* ---------- emailing the finished answers ---------- */
+function scoreText(v) { return v === UNFAMILIAR ? "Not familiar" : String(v); }
+function submitAnswers() {
+  state.send = "sending"; render();
+  const payload = {
+    _subject: "Love It or Hate It: new response",
+    _template: "table",
+    _captcha: "false",
+    "Finished at": new Date(state.completedAt).toUTCString(),
+    "Not familiar with (count)": String(ORGS.filter(o => state.ratings[o.slug]?.work === UNFAMILIAR).length),
+  };
+  ORGS.slice().sort((a, b) => a.name.localeCompare(b.name)).forEach(o => {
+    const r = state.ratings[o.slug] || {};
+    payload[o.name] = `Name ${scoreText(r.name)} / Logo ${scoreText(r.logo)} / Work ${scoreText(r.work)}`;
+  });
+  fetch(FORM_ENDPOINT, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Accept": "application/json" },
+    body: JSON.stringify(payload),
+  }).then(res => res.ok ? res.json() : Promise.reject(res.status))
+    .then(j => { if (j && (j.success === false || j.success === "false")) throw new Error(j.message || "not sent"); state.send = "sent"; })
+    .catch(() => { state.send = "error"; })
+    .finally(() => { save(); if (state.screen === "done") render(); });
+}
+
+/* ---------- screens ---------- */
+function noticeHtml() { return ""; }
+
+function renderIntro() {
+  const rated = state.order.filter(complete).length;
+  const inProgress = state.order.length && !state.completedAt && rated > 0;
+  const finished = !!state.completedAt;
+  app.innerHTML = `
+    <section class="intro">
+      <p class="eyebrow">${ORGS.length} orgs &middot; about 5 minutes</p>
+      <h1>Love It or Hate It</h1>
+      <p>You'll see one organization at a time. Give your honest first reaction to three things:</p>
+      <div class="three">
+        <div><b>NAME</b><span>the words</span></div>
+        <div><b>LOGO</b><span>the look</span></div>
+        <div><b>WORK</b><span>what they do</span></div>
+      </div>
+      <div>
+        <div class="dots" aria-hidden="true">${[1,2,3,4,5].map(v => `<span class="dot" data-v="${v}" aria-pressed="true" style="display:grid;place-items:center">${v}</span>`).join("")}</div>
+        <div class="scale-demo" style="margin-top:6px"><span>1 &middot; Hate it</span><span>Love it &middot; 5</span></div>
+      </div>
+      ${noticeHtml()}
+      <div class="actions">
+        ${finished
+          ? `<button class="btn" id="see-summary">See my answers</button>
+             <button class="btn ghost" id="restart">Start over</button>`
+          : inProgress
+            ? `<button class="btn" id="resume">Continue (${rated} of ${ORGS.length} done)</button>
+               <button class="btn ghost" id="restart">Start over</button>`
+            : `<button class="btn" id="start">Start</button>`}
+      </div>
+    </section>`;
+  on("start", startNew);
+  on("restart", startNew);
+  on("resume", () => { state.idx = firstIncomplete(); go("play"); });
+  on("see-summary", () => go("summary"));
+}
+
+function firstIncomplete() { const i = state.order.findIndex(s => !complete(s)); return i < 0 ? state.order.length - 1 : i; }
+function startNew() {
+  state.order = shuffle(ORGS.map(o => o.slug));
+  state.ratings = {}; state.idx = 0; state.completedAt = null; state.startedAt = new Date().toISOString();
+  save(); go("play");
+}
+
+function renderPlay() {
+  const slug = state.order[state.idx], o = BY_SLUG[slug];
+  const r = state.ratings[slug] || {};
+  const n = state.order.length, done = state.order.filter(complete).length;
+  const last = state.idx === n - 1;
+  app.innerHTML = `
+    <div class="topbar"><button class="btn link" id="home">Exit</button><span>${state.idx + 1} / ${n}</span></div>
+    <div class="progress" aria-hidden="true"><i style="width:${(done / n) * 100}%"></i></div>
+    ${noticeHtml()}
+    <article class="card">
+      <div class="logo-tile">${logoImg(o)}</div>
+      <div class="org-name">${esc(o.name)}</div>
+      ${DIMS.map(d => `
+        <div class="rate" role="group" aria-label="${esc(d.hint)}">
+          <div class="rate-head"><b>${d.label}</b><small>${r[d.key] === UNFAMILIAR ? "Not familiar" : r[d.key] ? r[d.key] + " / 5" : ""}</small></div>
+          <div class="dots">${[1,2,3,4,5].map(v => `<button class="dot" data-k="${d.key}" data-v="${v}" aria-pressed="${r[d.key] === v}" aria-label="${d.label} ${v} of 5">${v}</button>`).join("")}</div>
+          <div class="ends"><span>Hate it</span><span>Love it</span></div>
+          ${d.key === "work" ? `<button class="unfamiliar" data-k="work" data-v="${UNFAMILIAR}" aria-pressed="${r.work === UNFAMILIAR}">Not familiar with their work</button>` : ""}
+        </div>`).join("")}
+    </article>
+    <div class="nav">
+      <button class="btn ghost" id="back" ${state.idx === 0 ? "disabled" : ""} aria-label="Previous organization">Back</button>
+      <button class="btn" id="next" ${complete(slug) ? "" : "disabled"}>${last ? "Finish" : "Next"}</button>
+    </div>`;
+  app.querySelectorAll("[data-k]").forEach(b => b.addEventListener("click", () => {
+    const k = b.dataset.k, v = b.dataset.v === UNFAMILIAR ? UNFAMILIAR : Number(b.dataset.v);
+    state.ratings[slug] = { ...(state.ratings[slug] || {}), [k]: v };
+    renderPlay();
+  }));
+  on("home", () => { save(); go("intro"); });
+  on("back", () => { state.idx--; save(); renderPlay(); window.scrollTo(0, 0); });
+  on("next", () => {
+    if (last) { state.completedAt = new Date().toISOString(); save(); go("done"); submitAnswers(); return; }
+    state.idx++; save(); renderPlay(); window.scrollTo(0, 0);
+  });
+}
+
+function renderDone() {
+  const s = state.send;
+  const status = s === "sending" ? `<p class="muted">Sending your answers&hellip;</p>`
+    : s === "sent" ? `<p>Your answers have been sent. Want to look back at how you rated everyone?</p>`
+    : s === "error" ? `<p class="notice">Your answers didn't send. Check your connection and try again.</p>`
+    : "";
+  app.innerHTML = `
+    <section class="intro">
+      <p class="eyebrow">All ${ORGS.length} rated</p>
+      <h1>Thank you!</h1>
+      ${status}
+      <div class="actions">
+        ${s === "error" ? `<button class="btn" id="retry">Send again</button>` : ""}
+        <button class="btn ${s === "error" ? "ghost" : ""}" id="see-summary">See my answers</button>
+        <button class="btn ghost" id="home">Done</button>
+      </div>
+    </section>`;
+  on("retry", submitAnswers);
+  on("see-summary", () => go("summary"));
+  on("home", () => go("intro"));
+}
+
+function fmt(v) { return v === UNFAMILIAR ? "–" : v ?? "–"; }
+function renderSummary() {
+  const rows = state.order.filter(s => state.ratings[s]).map(s => ({ o: BY_SLUG[s], r: state.ratings[s] }));
+  const avg = r => { const v = [r.name, r.logo, r.work].filter(x => typeof x === "number"); return v.reduce((a, b) => a + b, 0) / (v.length || 1); };
+  rows.sort((a, b) => avg(b.r) - avg(a.r));
+  app.innerHTML = `
+    <div class="topbar"><button class="btn link" id="home">Back</button><span>${rows.length} rated</span></div>
+    <h2>Your answers</h2>
+    <p class="muted">Sorted from most to least loved, averaging all three.</p>
+    <div class="list">${rows.map(({ o, r }) => `
+      <div class="row">
+        <div class="mini">${logoImg(o)}</div>
+        <div style="min-width:0">
+          <div class="nm">${esc(o.name)}</div>
+          <div class="scores"><span>Name <b>${fmt(r.name)}</b></span><span>Logo <b>${fmt(r.logo)}</b></span><span>Work <b>${r.work === UNFAMILIAR ? "Not familiar" : fmt(r.work)}</b></span></div>
+        </div>
+      </div>`).join("")}</div>`;
+  on("home", () => go("intro"));
+}
+
+/* ---------- plumbing ---------- */
+function on(id, fn) { const el = document.getElementById(id); if (el) el.addEventListener("click", fn); }
+function go(screen) {
+  state.screen = screen;
+  render(); window.scrollTo(0, 0);
+}
+function render() {
+  ({ intro: renderIntro, play: renderPlay, done: renderDone, summary: renderSummary })[state.screen]();
+}
+
+restore();
+if (state.completedAt && state.send !== "sent") state.send = "error";
+render();
+</script>
+</body>
+</html>
